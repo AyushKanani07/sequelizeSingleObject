@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Code Highlighting Example</title>
-    <link href="https://cdn.jsdelivr.net/npm/prismjs@1.28.0/themes/prism-tomorrow.css" rel="stylesheet"/>
+    <link href="https://cdn.jsdelivr.net/npm/prismjs@1.28.0/themes/prism-tomorrow.css" rel="stylesheet" />
     <style>
         body {
             font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
@@ -16,7 +17,12 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            overflow: hidden; /* Ensure moving text stays within viewport */
+            overflow: hidden;
+            /* Ensure moving text stays within viewport */
+        }
+
+        .main-container {
+            max-width: 1700px;
         }
 
         pre {
@@ -24,6 +30,14 @@
             width: 90%;
             max-width: 1200px;
             margin: 20px;
+        }
+
+        .code-container {
+            width: 100%;
+            display: flex;
+            flex-direction: row;
+            gap: 30px;
+            justify-content: space-between;
         }
 
         .scroll-container {
@@ -48,7 +62,8 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #7e7e7e;
         }
-/* 
+
+        /* 
         .moving-text {
             position: absolute;
             font-size: 25px;
@@ -80,59 +95,97 @@
         } */
     </style>
 </head>
+
 <body>
-    <h1>Sequelize query for get the result in single object while relationship of two or more table are in use</h1>
-    <!-- Code Block -->
-    <pre id="scroll-container"><code class="language-javascript">
-        import { Employee } from "../../models/employee.model.js";
-        import { Branch } from "../../models/branch.model.js";
-        import { sequelize } from "../../models/index.js";
+    <div class="main-container">
+        <h1>Sequelize query for get the result in single object while relationship of two or more table are in use</h1>
+        <!-- Code Block -->
+        <div class="code-container">
+            <pre id="scroll-container"><code class="language-javascript">
+import { Employee } from "../../models/employee.model.js";
+import { Branch } from "../../models/branch.model.js";
+import { sequelize } from "../../models/index.js";
 
-        export class EmployeeController {
-            getModelAttributes(model, aliasPrefix = '', attributes = null) {
-                const attrList = attributes || Object.keys(model.getAttributes());
-                return attrList.map(attr => [
-                    sequelize.col(`${aliasPrefix}${attr}`),
-                    attr
-                ]);
-            }
-            getAllEmployee = async (req, res, next) => {
-                // If you want to get all attributes of the model 
-                const branchAllAttributes = this.getModelAttributes(Branch, 'branch.');
-                // If you want to get specific attributes of the model
-                const branchAttributes = this.getModelAttributes(Branch, 'branch.', ['branch_name', 'branch_id', 'branch_mgr_id']);
-                try {
-                    const employees = await Employee.findAll({
-                        attributes: {
-                            //You can use directly sequelize.col() method to merge columns in single object of result
-                            /* 
-                            include: [
-                                [sequelize.col('branch.branch_name'), 'branch'],
-                                [sequelize.col('branch.branch_id'), 'branch_id'],
-                            ], 
-                            */
-
-                            // Or you can use common function to get array of columns
-                            include: branchAttributes, 
-                        },
-                        include: [
-                            {
-                                model: Branch,
-                                as: 'branch',
-                                attributes: [], // Avoid including nested attributes directly. Using this you specify that we don't need any data in object
-                            },
-                        ],
-                        raw: true,
-                        // nest: true // Ensures a flat structure
-                    });
-
-                    res.json(employees);
-                } catch (error) {
-                    res.status(500).json({ error: error.message });
-                }
-            };
+    getAllEmployee = async (req, res, next) => {
+        try {
+            const employees = await Employee.findAll({
+                attributes: {
+                    include: [
+                        [sequelize.col('branch.branch_name'), 'branch'],
+                        [sequelize.col('branch.branch_id'), 'branch_id'],
+                    ], 
+                },
+                include: [
+                    {
+                        model: Branch,
+                        as: 'branch',
+                        attributes: [], // Avoid including nested attributes directly. Using this you specify that we don't need any data in object
+                    },
+                ],
+                raw: true,
+                // nest: true // Ensures a flat structure
+            });
+        
+            res.json(employees);
+        } catch (error) {
+            res.status(500).json({ error: error.message });
         }
-    </code></pre>
+    };
+            </code></pre>
+            <pre id="scroll-container"><code class="language-javascript">
+import { Employee } from "../../models/employee.model.js";
+import { Branch } from "../../models/branch.model.js";
+import { sequelize } from "../../models/index.js";
+        
+export class EmployeeController {
+
+    getModelAttributes(model, aliasPrefix = '', attributes = null, attrForAlias = {}) {
+        const attrList = attributes || Object.keys(model.getAttributes());
+        return attrList.map(attr => [
+            sequelize.col(`${aliasPrefix}${attr}`),
+            attr
+        ]);
+    }
+
+    getAllEmployee = async (req, res, next) => {
+        // If you want to get all attributes of the model 
+        const branchAllAttributes = this.getModelAttributes(Branch, 'branch.');
+        // If you want to get specific attributes of the model
+        const branchAttributes = this.getModelAttributes(Branch, 'branch.', ['branch_name', 'branch_id', 'branch_mgr_id']);
+        //If you want to give alias to some attributes
+        const attrForAlias = {
+            branch_name: 'b_name'
+        };
+        const branchAttributesAlias = this.getModelAttributes(Branch, 'branch.', ['branch_name', 'branch_id'], attrForAlias);
+        try {
+            const employees = await Employee.findAll({
+                attributes: {
+                    include: branchAttributes, 
+                },
+                include: [
+                    {
+                        model: Branch,
+                        as: 'branch',
+                        attributes: [], // Avoid including nested attributes directly. Using this you specify that we don't need any data in object
+                    },
+                ],
+                raw: true,
+                // nest: true // Ensures a flat structure
+            });
+        
+            res.json(employees);
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    };
+}
+            </code></pre>
+        </div>
+        <div class="code-container">
+            <h3>Direct add column in inculde</h3>
+            <h3>Add column using common function</h3>
+        </div>
+    </div>
 
     <!-- Moving text -->
     <!-- <div class="moving-text">Ayush Kanani</div>
@@ -140,4 +193,5 @@
 
     <script src="https://cdn.jsdelivr.net/npm/prismjs@1.28.0/prism.js"></script>
 </body>
+
 </html>
