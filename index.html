@@ -16,7 +16,9 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
+            overflow: hidden; /* Ensure moving text stays within viewport */
         }
+
         pre {
             height: 700px;
             width: 90%;
@@ -46,61 +48,95 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #7e7e7e;
         }
+
+        .moving-text {
+            position: absolute;
+            font-size: 25px;
+            padding: 10px;
+            animation: moveText 50s linear infinite;
+        }
+
+        .moving-text-reverse{
+            position: absolute;
+            padding: 10px;
+            animation: moveTextReverse 50s linear infinite;
+            font-size: 25px;
+
+        }
+
+        @keyframes moveText {
+            0% { top: 0; left: 0; }
+            25% { top: 0; left: calc(100% - 200px); }
+            50% { top: calc(100% - 50px); left: calc(100% - 200px); }
+            75% { top: calc(100% - 50px); left: 0; }
+            100% { top: 0; left: 0; }
+        }
+        @keyframes moveTextReverse {
+            0% { top: calc(100% - 50px); left: calc(100% - 200px); }
+            25% { top: calc(100% - 50px); left: 0; }
+            50% { top: 0; left: 0; }
+            75% { top: 0; left: calc(100% - 200px); }
+            100% { top: calc(100% - 50px); left: calc(100% - 200px); }
+        }
     </style>
 </head>
 <body>
-        <h1>Sequelize query for get the result in single object while relationship of two or more table are in use</h1>
-        <!-- Code Block -->
-        <pre id="scroll-container"><code class="language-javascript">
-            import { Employee } from "../../models/employee.model.js";
-            import { Branch } from "../../models/branch.model.js";
-            import { sequelize } from "../../models/index.js";
+    <h1>Sequelize query for get the result in single object while relationship of two or more table are in use</h1>
+    <!-- Code Block -->
+    <pre id="scroll-container"><code class="language-javascript">
+        import { Employee } from "../../models/employee.model.js";
+        import { Branch } from "../../models/branch.model.js";
+        import { sequelize } from "../../models/index.js";
 
-            export class EmployeeController {
-                getModelAttributes(model, aliasPrefix = '', attributes = null) {
-                    const attrList = attributes || Object.keys(model.getAttributes());
-                    return attrList.map(attr => [
-                        sequelize.col(`${aliasPrefix}${attr}`),
-                        attr
-                    ]);
-                }
-                getAllEmployee = async (req, res, next) => {
-                    // If you want to get all attributes of the model 
-                    const branchAllAttributes = this.getModelAttributes(Branch, 'branch.');
-                    // If you want to get specific attributes of the model
-                    const branchAttributes = this.getModelAttributes(Branch, 'branch.', ['branch_name', 'branch_id', 'branch_mgr_id']);
-                    try {
-                        const employees = await Employee.findAll({
-                            attributes: {
-                                //You can use directly sequelize.col() method to merge columns in single object of result
-                                /* 
-                                include: [
-                                    [sequelize.col('branch.branch_name'), 'branch'],
-                                    [sequelize.col('branch.branch_id'), 'branch_id'],
-                                ], 
-                                */
-
-                                // Or you can use common function to get array of columns
-                                include: branchAttributes, 
-                            },
-                            include: [
-                                {
-                                    model: Branch,
-                                    as: 'branch',
-                                    attributes: [], // Avoid including nested attributes directly. Using this you specify that we don't need any data in object
-                                },
-                            ],
-                            raw: true,
-                            // nest: true // Ensures a flat structure
-                        });
-
-                        res.json(employees);
-                    } catch (error) {
-                        res.status(500).json({ error: error.message });
-                    }
-                };
+        export class EmployeeController {
+            getModelAttributes(model, aliasPrefix = '', attributes = null) {
+                const attrList = attributes || Object.keys(model.getAttributes());
+                return attrList.map(attr => [
+                    sequelize.col(`${aliasPrefix}${attr}`),
+                    attr
+                ]);
             }
-        </code></pre>
+            getAllEmployee = async (req, res, next) => {
+                // If you want to get all attributes of the model 
+                const branchAllAttributes = this.getModelAttributes(Branch, 'branch.');
+                // If you want to get specific attributes of the model
+                const branchAttributes = this.getModelAttributes(Branch, 'branch.', ['branch_name', 'branch_id', 'branch_mgr_id']);
+                try {
+                    const employees = await Employee.findAll({
+                        attributes: {
+                            //You can use directly sequelize.col() method to merge columns in single object of result
+                            /* 
+                            include: [
+                                [sequelize.col('branch.branch_name'), 'branch'],
+                                [sequelize.col('branch.branch_id'), 'branch_id'],
+                            ], 
+                            */
+
+                            // Or you can use common function to get array of columns
+                            include: branchAttributes, 
+                        },
+                        include: [
+                            {
+                                model: Branch,
+                                as: 'branch',
+                                attributes: [], // Avoid including nested attributes directly. Using this you specify that we don't need any data in object
+                            },
+                        ],
+                        raw: true,
+                        // nest: true // Ensures a flat structure
+                    });
+
+                    res.json(employees);
+                } catch (error) {
+                    res.status(500).json({ error: error.message });
+                }
+            };
+        }
+    </code></pre>
+
+    <!-- Moving text -->
+    <div class="moving-text">Ayush Kanani</div>
+    <div class="moving-text-reverse"> Upendra Yadav</div>
 
     <script src="https://cdn.jsdelivr.net/npm/prismjs@1.28.0/prism.js"></script>
 </body>
