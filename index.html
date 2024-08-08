@@ -12,43 +12,64 @@
             background-color: #1e1e1e;
             color: #d4d4d4;
             margin: 0;
-            height: 100vh;
+            padding: 20px; /* Add padding around the body */
+            height: auto; /* Adjust height */
             display: flex;
             flex-direction: column;
-            justify-content: center;
             align-items: center;
-            overflow: hidden;
-            /* Ensure moving text stays within viewport */
+
+            /* overflow: hidden; */
         }
 
         .main-container {
-            max-width: 1700px;
+            width: 100%;
+            max-width: 1200px; /* Max width for large screens */
+            margin: 0 auto; /* Centering */
         }
 
         pre {
-            height: 700px;
-            width: 90%;
-            max-width: 1200px;
-            margin: 20px;
+            width: 100%; /* Full width for responsiveness */
+            max-height: 700px;
+            margin: 10px 0; /* Adjusted margin */
+            overflow-x: auto; /* Only horizontal scroll */
         }
 
         .code-container {
-            width: 100%;
             display: flex;
-            flex-direction: row;
-            gap: 30px;
-            justify-content: space-between;
+            flex-direction: row; /* Stack them vertically on small screens */
+            gap: 20px;
         }
 
-        .scroll-container {
-            width: 100%;
-            overflow-x: auto;
-            overflow-y: hidden;
+        @media (max-width: 768px) {
+            .code-container {
+                flex-direction: column; /* Side by side on larger screens */
+                justify-content: space-between;
+
+            }
+
+            pre {
+                max-width: 95%; /* Each code block takes nearly half the container */
+            }
+        }
+
+        @media (min-width: 1024px) {
+            body {
+                padding: 40px; /* More padding on larger screens */
+            }
+
+            .main-container {
+                max-width: 1400px; /* Larger max-width for very large screens */
+            }
+
+            pre {
+                max-width: 100%; /* Allow each block to expand */
+                margin: 20px;
+            }
         }
 
         ::-webkit-scrollbar {
-            width: 0px;
             height: 12px;
+            width: 0px;
         }
 
         ::-webkit-scrollbar-track {
@@ -62,37 +83,6 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #7e7e7e;
         }
-
-        /* 
-        .moving-text {
-            position: absolute;
-            font-size: 25px;
-            padding: 10px;
-            animation: moveText 50s linear infinite;
-        }
-
-        .moving-text-reverse{
-            position: absolute;
-            padding: 10px;
-            animation: moveTextReverse 50s linear infinite;
-            font-size: 25px;
-
-        }
-
-        @keyframes moveText {
-            0% { top: 0; left: 0; }
-            25% { top: 0; left: calc(100% - 200px); }
-            50% { top: calc(100% - 50px); left: calc(100% - 200px); }
-            75% { top: calc(100% - 50px); left: 0; }
-            100% { top: 0; left: 0; }
-        }
-        @keyframes moveTextReverse {
-            0% { top: calc(100% - 50px); left: calc(100% - 200px); }
-            25% { top: calc(100% - 50px); left: 0; }
-            50% { top: 0; left: 0; }
-            75% { top: 0; left: calc(100% - 200px); }
-            100% { top: calc(100% - 50px); left: calc(100% - 200px); }
-        } */
     </style>
 </head>
 
@@ -102,6 +92,8 @@
         <!-- Code Block -->
         <div class="code-container">
             <pre id="scroll-container"><code class="language-javascript">
+<h1 id="note">Note: Direct add column in inculde</h1>
+
 import { Employee } from "../../models/employee.model.js";
 import { Branch } from "../../models/branch.model.js";
 import { sequelize } from "../../models/index.js";
@@ -133,6 +125,8 @@ import { sequelize } from "../../models/index.js";
     };
             </code></pre>
             <pre id="scroll-container"><code class="language-javascript">
+<h1 id="note">Note: Add column using common function</h1>
+
 import { Employee } from "../../models/employee.model.js";
 import { Branch } from "../../models/branch.model.js";
 import { sequelize } from "../../models/index.js";
@@ -180,10 +174,6 @@ export class EmployeeController {
     };
 }
             </code></pre>
-        </div>
-        <div class="code-container">
-            <h3>Direct add column in inculde</h3>
-            <h3>Add column using common function</h3>
         </div>
     </div>
 
