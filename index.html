@@ -136,21 +136,21 @@ export class EmployeeController {
     getModelAttributes(model, aliasPrefix = '', attributes = null, attrForAlias = {}) {
         const attrList = attributes || Object.keys(model.getAttributes());
         return attrList.map(attr => [
-            sequelize.col(`${aliasPrefix}${attr}`),
-            attr
+            sequelize.col(`${aliasPrefix}.${attr}`),
+            attrForAlias[attr] || attr   
         ]);
     }
 
     getAllEmployee = async (req, res, next) => {
         // If you want to get all attributes of the model 
-        const branchAllAttributes = this.getModelAttributes(Branch, 'branch.');
+        const branchAllAttributes = this.getModelAttributes(Branch, 'branch');
         // If you want to get specific attributes of the model
-        const branchAttributes = this.getModelAttributes(Branch, 'branch.', ['branch_name', 'branch_id', 'branch_mgr_id']);
+        const branchAttributes = this.getModelAttributes(Branch, 'branch', ['branch_name', 'branch_id', 'branch_mgr_id']);
         //If you want to give alias to some attributes
         const attrForAlias = {
             branch_name: 'b_name'
         };
-        const branchAttributesAlias = this.getModelAttributes(Branch, 'branch.', ['branch_name', 'branch_id'], attrForAlias);
+        const branchAttributesAlias = this.getModelAttributes(Branch, 'branch', ['branch_name', 'branch_id'], attrForAlias);
         try {
             const employees = await Employee.findAll({
                 attributes: {
